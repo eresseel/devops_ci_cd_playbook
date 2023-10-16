@@ -1,0 +1,44 @@
+---
+- name: Setup Name Resolution
+  hosts: jenkins
+  become: true
+  ignore_errors: yes
+  tasks:
+    - name: Intersection of the IP addresses
+      ansible.builtin.set_fact:
+        isect: >
+          {{ ansible_all_ipv4_addresses | intersect(hostvars[item].ansible_all_ipv4_addresses) }}
+      with_items: "{{ groups['vagrant'] }}"
+      when: item != inventory_hostname
+
+    - name: Intersection in case of AIO
+      ansible.builtin.set_fact:
+        isect:
+          - 127.0.0.1
+          - "{{ ansible_docker0.ipv4.address }}"
+          - "{{ ansible_default_ipv4.address }}"
+      when:
+        - "'vagrant' in group_names"
+        - "{{ groups['vagrant'] | length }} == 1"
+
+    - name: Intersection on the host machine
+      ansible.builtin.set_fact:
+        isect:
+          - 127.0.0.1
+          - 10.0.2.15
+          - "{{ ansible_docker0.ipv4.address }}"
+      when: inventory_hostname == 'localhost'
+
+    - name: "Add Host Aliases in /etc/hosts"
+      ansible.builtin.blockinfile:
+        dest: /etc/hosts
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+        block: >
+          {{ hostvars[item].ansible_all_ipv4_addresses | difference(isect) | first }}
+          {% for vhost in hostvars[item].vhost_list |
+          default([ hostvars[item].ansible_fqdn ]) %}
+          {{ vhost }}
+          {% endfor %}
+      with_items: "[ {{ groups['vagrant'] }} ]"
+      tags:
+        - skip_ansible_lint
