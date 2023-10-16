@@ -1,0 +1,51 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: ubuntu-focal-jenkins
+    image: ubuntu:20.04
+    pre_build_image: true
+    groups:
+      - jenkins
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      local_tmp: '/tmp'
+      remote_tmp: '/tmp'
+      display_args_to_stdout: true
+      error_on_undefined_vars: true
+      system_warnings: true
+      deprecation_warnings: true
+      command_warnings: true
+      nocolor: false
+      log_path: ${PWD}/ubuntu-focal-jenkins-${SUFFIX:-dev}.log
+      host_key_checking: false
+  options:
+    diff: true
+scenario:
+  create_sequence:
+    - destroy
+    - create
+  check_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - create
+    - prepare
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - dependency
+verifier:
+  name: testinfra
+  enabled: true
+  options:
+    junit-xml: 'ubuntu-focal-jenkins.xml'

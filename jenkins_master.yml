@@ -1,0 +1,193 @@
+---
+- name: Installing Build Tools
+  hosts: master
+  become: true
+  vars:
+    jenkins_jar_location: /opt/jenkins-cli.jar
+  handlers:
+    - name: Restart Docker Daemon
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+  roles:
+    - role: geerlingguy.docker
+      docker_package: "{{ docker_version }}"
+
+    - role: tecris.maven
+      maven_version: "3.9.4"
+  tasks:
+    - name: Install packages from repository
+      ansible.builtin.apt:
+        name:
+          - git
+          - graphviz
+          - openjdk-11-jre
+          - openjdk-11-jdk
+        state: present
+
+    - name: Ensure Docker CA Directory is present
+      ansible.builtin.file:
+        dest: "/etc/docker/certs.d/{{ item.domain }}"
+        state: directory
+      with_items:
+        - "{{ docker_registry_list }}"
+      when: docker_registry_list is defined
+
+    - name: Install The Docker Registry CA for Docker Daemon
+      ansible.builtin.copy:
+        src: "{{ item.crt }}"
+        dest: "/etc/docker/certs.d/{{ item.domain }}/ca.crt"
+      with_items:
+        - "{{ docker_registry_list }}"
+      when: docker_registry_list is defined
+      notify: Restart Docker Daemon
+
+    - name: Configure docker daemon.json
+      ansible.builtin.copy:
+        content: "{{ docker_config | to_nice_json }}"
+        dest: /etc/docker/daemon.json
+        mode: 0444
+        owner: root
+        group: docker
+      when: docker_config is defined
+      notify: Restart Docker Daemon
+
+    - name: Ensure jenkins user is in docker group
+      ansible.builtin.user:
+        name: jenkins
+        append: yes
+        groups: docker
+
+- name: Setup NTP service
+  hosts: master
+  become: true
+  roles:
+    - role: geerlingguy.ntp
+      ntp_area: "{{ node_ntp_area }}"
+      ntp_manage_config: "{{ node_ntp_manage_config }}"
+      ntp_timezone: "{{ node_ntp_timezone }}"
+
+- name: Install node-exporter
+  hosts: master
+  become: true
+  roles:
+    - role: UnderGreen.prometheus-node-exporter
+      vars:
+        prometheus_node_exporter_version: "{{ node_exporter_version }}"
+
+- name: Setup Jenkins Master
+  hosts: master
+  become: true
+  collections:
+    - devops.devops_jenkins_collection
+  vars:
+    jenkins_jar_location: /opt/jenkins-cli.jar
+  roles:
+    - role: ansible_role_jenkins_master
+      jenkins_master_hostname: "{{ jenkins_server_name | default(omit) }}"
+      jenkins_master_description: "{{ jenkins_description | default('Jenkins main') }}"
+      jenkins_master_executors: "{{ jenkins_executors | default(1) }}"
+      jenkins_master_usage: "{{ jenkins_slave_usage | default('NORMAL') }}"  # EXCLUSIVE
+      jenkins_master_labels: "{{ jenkins_labels | default('master,devops') }}"
+      jenkins_master_plugins: "{{ jenkins_plugin_list | default(omit) }}"
+      jenkins_master_ssh_credentials: "{{ jenkins_ssh_credential_list | default(omit) }}"
+      jenkins_master_usr_pw_credentials: "{{ jenkins_usr_pw_credential_list | default(omit) }}"
+      jenkins_master_secret_file_credentials: "{{ jenkins_secret_file_credential_list | default(omit) }}"
+      jenkins_master_secret_text_credentials: "{{ jenkins_secret_text_credential_list | default(omit) }}"
+      jenkins_master_maven_installations: "{{ jenkins_maven_list | default(omit) }}"
+      jenkins_master_oracle_jdk_versions: "{{ jenkins_oracle_jdk_list | default(omit) }}"
+      jenkins_master_organization_folders: "{{ jenkins_organization_folder_list | default(omit) }}"
+      jenkins_master_global_shared_libraries: "{{ jenkins_global_shared_library_list | default(omit) }}"
+      jenkins_master_sonar_installations: "{{ jenkins_sonar_env | default(omit) }}"
+      jenkins_master_global_maven_configs: "{{ jenkins_global_maven_config_list | default(omit) }}"
+      jenkins_master_global_json_configs: "{{ jenkins_global_json_config_list | default(omit) }}"
+      jenkins_master_global_xml_configs: "{{ jenkins_global_xml_config_list | default(omit) }}"
+      jenkins_master_use_ldap: "{{ jenkins_ldap_config is defined | default(false) }}"
+      jenkins_master_ldap_config: "{{ jenkins_ldap_config | default(omit)}}"
+      jenkins_master_admin_username: "{{ sjenkins_ad_username | default('admin') }}"
+      jenkins_master_admin_password: "{{ sjenkins_ad_password | default('admin') }}"
+      jenkins_master_smtp_host: "{{ jenkins_smtp_host | default(omit) }}"
+      jenkins_master_admin_address: "{{ jenkins_admin_address | default(omit)}}"
+      jenkins_master_matrix_authorization_strategy: "{{ jenkins_matrix_authorization_strategy | default(omit) }}"
+      jenkins_master_global_properties_environment_variables: "{{ jenkins_global_properties_environment_variable_list | default(omit)}}"
+      jenkins_master_access_control_for_builds: "{{ jenkins_access_control_for_builds | default(omit) }}"
+
+- name: Create cron jobs
+  hosts: master
+  become: true
+  become_user: "jenkins"
+  tasks:
+    - name: Schedule clean .m2 repository
+      ansible.builtin.cron:
+        name: "Local maven repo"
+        special_time: daily
+        user: "jenkins"
+        job: >
+          rm -rf /home/jenkins/.m2/repository/ 3>&1 1>&2 2>&3 3>&- |
+          logger -t "cleanup.m2" -p user.err -i
+
+    - name: Schedule docker volume prune
+      ansible.builtin.cron:
+        name: "Prune docker system"
+        special_time: daily
+        user: "jenkins"
+        job: >
+          docker system prune -f 3>&1 1>&2 2>&3 3>&- |
+          logger -t "cleanup.docker" -p user.err -i
+
+    - name: Set max_map_count in runtime
+      ansible.builtin.command:
+        cmd: 'sysctl -w vm.max_map_count=262144'
+      become: true
+      become_user: root
+      changed_when: false
+
+    - name: max_map_count setting at booting time exist
+      ansible.builtin.command:
+        cmd: 'grep "vm.max_map_count=262144" /etc/sysctl.conf'
+      become: true
+      become_user: root
+      register: max_map_count
+      failed_when: max_map_count.rc > 1
+      changed_when: max_map_count.rc == 1
+
+    - name: Set max_map_count at booting time
+      ansible.builtin.shell: echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+      become: true
+      become_user: root
+      when: max_map_count.rc == 1
+
+  pre_tasks:
+    - name: Verify If Jenkins CLI Is Installed
+      ansible.builtin.stat:
+        path: /opt/jenkins-cli.jar
+      register: jenkins_cli_jar
+
+    - name: Try LDAP Credentials for Jenkins Login
+      ansible.builtin.command: >
+        java -jar {{ jenkins_jar_location }} -s http://{{ jenkins_server_name }}:{{ 8080 }}/
+        -auth {{ secret_jenkins_ad_username }}:{{ secret_jenkins_ad_password }}
+        who-am-i
+      register: jenkins_ldap_result
+      ignore_errors: true
+      changed_when: false
+      when:
+        - secret_jenkins_ad_username is defined
+        - secret_jenkins_ad_password is defined
+        - jenkins_cli_jar.stat.exists
+
+    - name: Override Default Jenkins Cred. With AD Cred.
+      ansible.builtin.set_fact:
+        sjenkins_ad_username: "{{ secret_jenkins_ad_username }}"
+        sjenkins_ad_password: "{{ secret_jenkins_ad_password }}"
+      when:
+        - secret_jenkins_ad_username is defined
+        - secret_jenkins_ad_password is defined
+        - jenkins_cli_jar.stat.exists
+        - jenkins_ldap_result is succeeded
+
+  handlers:
+    - name: Restart Docker Daemon
+      ansible.builtin.service:
+        name: docker
+        state: restarted

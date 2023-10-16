@@ -1,0 +1,384 @@
+---
+docker_version: "docker-ce=5:24.0.5-1~ubuntu.20.04~focal"
+jenkins_server_name: 'jenkins-master'
+jenkins_executors: 4
+jenkins_slave_usage: 'NORMAL'
+jenkins_labels: 'master,devops,ci'
+jenkins_plugin_list:
+  - name: 'ace-editor'
+    version: '1.1'
+  - name: 'apache-httpcomponents-client-4-api'
+    version: '4.5.13-138.v4e7d9a_7b_a_e61'
+  - name: 'authentication-tokens'
+    version: '1.4'
+  - name: 'authorize-project'
+    version: '1.3.0'
+  - name: 'blueocean-autofavorite'
+    version: '1.2.3'
+  - name: 'blueocean-bitbucket-pipeline'
+    version: '1.24.3'
+  - name: 'blueocean-commons'
+    version: '1.24.3'
+  - name: 'blueocean-config'
+    version: '1.24.3'
+  - name: 'blueocean-core-js'
+    version: '1.24.3'
+  - name: 'blueocean-dashboard'
+    version: '1.24.3'
+  - name: 'blueocean-display-url'
+    version: '2.2.0'
+  - name: 'blueocean-events'
+    version: '1.24.3'
+  - name: 'blueocean-github-pipeline'
+    version: '1.24.3'
+  - name: 'blueocean-git-pipeline'
+    version: '1.24.3'
+  - name: 'blueocean-i18n'
+    version: '1.24.3'
+  - name: 'blueocean-jira'
+    version: '1.24.3'
+  - name: 'blueocean-jwt'
+    version: '1.24.3'
+  - name: 'blueocean-personalization'
+    version: '1.24.3'
+  - name: 'blueocean-pipeline-api-impl'
+    version: '1.24.3'
+  - name: 'blueocean-pipeline-editor'
+    version: '1.24.3'
+  - name: 'blueocean-pipeline-scm-api'
+    version: '1.24.3'
+  - name: 'blueocean-rest-impl'
+    version: '1.24.3'
+  - name: 'blueocean-rest'
+    version: '1.24.3'
+  - name: 'blueocean'
+    version: '1.24.3'
+  - name: 'blueocean-web'
+    version: '1.24.3'
+  - name: 'bouncycastle-api'
+    version: '2.27'
+  - name: 'branch-api'
+    version: '2.5.5'
+  - name: 'cloudbees-bitbucket-branch-source'
+    version: '2.9.6'
+  - name: 'cloudbees-folder'
+    version: '6.15'
+  - name: 'command-launcher'
+    version: '1.2'
+  - name: 'config-file-provider'
+    version: '3.7.0'
+  - name: 'credentials-binding'
+    version: '1.23'
+  - name: 'credentials'
+    version: '2.3.14'
+  - name: 'display-url-api'
+    version: '2.3.3'
+  - name: 'docker-commons'
+    version: '1.16'
+  - name: 'docker-workflow'
+    version: '1.23'
+  - name: 'durable-task'
+    version: '507.v050055d0cb_dd'
+  - name: 'favorite'
+    version: '2.3.1'
+  - name: 'git-client'
+    version: '3.5.1'
+  - name: 'github-api'
+    version: '1.116'
+  - name: 'github-branch-source'
+    version: '2.9.3'
+  - name: 'github'
+    version: '1.32.0'
+  - name: 'gitlab-api'
+    version: '1.0.6'
+  - name: 'gitlab-branch-source'
+    version: '1.5.3'
+  - name: 'git-server'
+    version: '1.9'
+  - name: 'git'
+    version: '4.5.1'
+  - name: 'handlebars'
+    version: '3.0.8'
+  - name: 'handy-uri-templates-2-api'
+    version: '2.1.8-22.v77d5b_75e6953'
+  - name: 'htmlpublisher'
+    version: '1.14'
+  - name: 'jackson2-api'
+    version: '2.12.0'
+  - name: 'javax-activation-api'
+    version: '1.2.0-2'
+  - name: 'javax-mail-api'
+    version: '1.6.2-5'
+  - name: 'jaxb'
+    version: '2.3.0'
+  - name: 'jdk-tool'
+    version: '1.0'
+  - name: 'jenkins-design-language'
+    version: '1.24.3'
+  - name: 'jira'
+    version: '3.0.14'
+  - name: 'job-dsl'
+    version: '1.77'
+  - name: 'jquery-detached'
+    version: '1.2.1'
+  - name: 'jsch'
+    version: '0.1.55.2'
+  - name: 'junit'
+    version: '1.29'
+  - name: 'kubernetes-client-api'
+    version: '4.11.1'
+  - name: 'kubernetes-credentials'
+    version: '0.7.0'
+  - name: 'kubernetes'
+    version: '1.28.4'
+  - name: 'ldap'
+    version: '2.2'
+  - name: 'lockable-resources'
+    version: '2.7'
+  - name: 'mailer'
+    version: '1.32.1'
+  - name: 'matrix-auth'
+    version: '2.6.4'
+  - name: 'matrix-project'
+    version: '1.18'
+  - name: 'mercurial'
+    version: '2.8'
+  - name: 'metrics'
+    version: '4.0.2.6'
+  - name: 'momentjs'
+    version: '1.1.1'
+  - name: 'okhttp-api'
+    version: '3.14.9'
+  - name: 'pipeline-build-step'
+    version: '2.11'
+  - name: 'pipeline-graph-analysis'
+    version: '1.10'
+  - name: 'pipeline-input-step'
+    version: '2.11'
+  - name: 'pipeline-milestone-step'
+    version: '1.3.1'
+  - name: 'pipeline-model-api'
+    version: '1.7.2'
+  - name: 'pipeline-model-declarative-agent'
+    version: '1.1.1'
+  - name: 'pipeline-model-definition'
+    version: '1.6.0'
+  - name: 'pipeline-model-extensions'
+    version: '1.7.2'
+  - name: 'pipeline-rest-api'
+    version: '2.13'
+  - name: 'pipeline-stage-step'
+    version: '2.3'
+  - name: 'pipeline-stage-tags-metadata'
+    version: '1.6.0'
+  - name: 'pipeline-stage-view'
+    version: '2.13'
+  - name: 'plain-credentials'
+    version: '1.7'
+  - name: 'pubsub-light'
+    version: '1.13'
+  - name: 'resource-disposer'
+    version: '0.20'
+  - name: 'role-strategy'
+    version: '3.1'
+  - name: 'scm-api'
+    version: '2.6.4'
+  - name: 'script-security'
+    version: '1.75'
+  - name: 'snakeyaml-api'
+    version: '1.27.0'
+  - name: 'sonar'
+    version: '2.13'
+  - name: 'sse-gateway'
+    version: '1.21'
+  - name: 'ssh-credentials'
+    version: '1.18.1'
+  - name: 'sshd'
+    version: '3.0.3'
+  - name: 'structs'
+    version: '324.va_f5d6774f3a_d'
+  - name: 'thinBackup'
+    version: '1.10'
+  - name: 'token-macro'
+    version: '2.13'
+  - name: 'trilead-api'
+    version: '1.67.vc3938a_35172f'
+  - name: 'variant'
+    version: '1.3'
+  - name: 'workflow-aggregator'
+    version: '2.6'
+  - name: 'workflow-api'
+    version: '2.40'
+  - name: 'workflow-basic-steps'
+    version: '2.19'
+  - name: 'workflow-cps-global-lib'
+    version: '2.15'
+  - name: 'workflow-cps'
+    version: '2.87'
+  - name: 'workflow-durable-task-step'
+    version: '2.35'
+  - name: 'workflow-job'
+    version: '2.40'
+  - name: 'workflow-multibranch'
+    version: '2.21'
+  - name: 'workflow-scm-step'
+    version: '408.v7d5b_135a_b_d49'
+  - name: 'workflow-step-api'
+    version: '639.v6eca_cd8c04a_a_'
+  - name: 'workflow-support'
+    version: '3.7'
+  - name: 'ws-cleanup'
+    version: '0.38'
+jenkins_ssh_credential_list:
+  - id: sjenkins
+    username: sjenkins
+    content_key_pub: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrTWKkgPRzxQm2BhNceJLgD8bsYEkSNC9qwAtyY2klSYybIXothONpXQbHPysCjxJ4xma4IAqKVzAxAO+1/ybRadXsjS+8qif7sw7uNvkTHHlS1QF9WCaadu+K7veYI3RvhU57m9NIZIJ1XCJza4LEEUIwgXclnU2ecoZNUiNDbFPj7aU6DExREFd69qCM2p2Hn4mDlXzOfsoSbE7M/KEjokizP3m/4G0Pj4Ofbx1pqnRJOesD8SBbgB1xWuDBOjRVULBDFNFIQCatUBd2C15LAZ+HNLqLsrzPrHvqwR/Fb0jYj4PNQsf1gNVOvEn6GPw9kgEmCd54vtw1eBhXU/PaowzDm2D/Rb7DCMcmCLYX+dGW9epEdmHXz6WOG8ldP3NFoPBlVtVwZ8fxE/4wIKjVRG8asKsDLrGbx5Fnyxzg2LuvA99mZZid9Od5lkLOXPbxgNo7jHJpTGDbmqI1b+4GS4dwTksPZW7NwJxpk3qrDREdnL8olRBwGdvgioAHxkc= kerb3rosz@kali
+    content_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      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
+      -----END OPENSSH PRIVATE KEY-----
+jenkins_usr_pw_credential_list:
+  - id: nexus_sjenkins
+    username: admin
+    password: admin123
+    description: "nexus_admin_usr_pw"
+jenkins_secret_file_credential_list:
+  - id: 'ca_release_keystore'
+    file: 'files/jenkins/secret_files/ca.release.keystore'
+    description: 'Keystore for release apks'
+jenkins_secret_text_credential_list:
+  - id: sonar_sjenkins_auth
+    secret: "{{ secret_sonar_auth_token | default() }}"
+    description: ''
+jenkins_maven_list:
+  - name: 'MVN3'
+    version: '3.9.4'
+jenkins_sonar_env:
+  - name: 'sonar.eresseel.org'
+    server_url: "https://proba.hu"
+jenkins_oracle_jdk_list:
+  - version: 11
+    default: true
+jenkins_global_json_config_list:
+  - id: 'eresseel-pipeline-config'
+    name: 'eresseel-pipeline-config'
+    comment: 'Configurations for the eresseel pipeline'
+    file: 'files/jenkins/configs/eresseel-pipeline-config.json'
+jenkins_global_maven_config_list:
+  - id: 'eresseel-maven-settings'
+    name: 'eresseel-maven-settings'
+    comment: 'Eresseel maven settings'
+    file: 'files/jenkins/configs/eresseel-maven-settings.xml'
+    server_credentials:
+      - server_id: 'snapshot'
+        credential_id: 'nexus_sjenkins'
+jenkins_global_xml_config_list:
+  - id: 'jalopy-config'
+    name: 'jalopy-config'
+    comment: 'Jalopy configuration'
+    file: 'files/jenkins/configs/jalopy-config.xml'
+jenkins_organization_folder_list:
+  - name: 'ERESSEEL'
+    display_name: 'ERESSEEL'
+    bitbucket_url: "http://atlassian.eresseel.org:7990/bitbucket"
+    project_key: 'ERESSEEL'
+    scan_credentials: 'bitbucket_admin'
+    checkout_credentials: 'sjenkins'
+    bitbucket_ssh_port: 7999
+    bitbucket_server_name: 'foo'
+    project_based_security:
+      - user_or_group: 'admin'
+        permissions:
+          - 'hudson.model.Hudson.Administer'
+      - user_or_group: 'bela'
+        permissions:
+          - 'hudson.model.Hudson.Read'
+          - 'hudson.model.Item.Read'
+          - 'hudson.model.View.Read'
+      - user_or_group: 'karcsi'
+        permissions:
+          - 'hudson.model.Hudson.Read'
+          - 'hudson.model.Item.Read'
+    pipeline_libraries:
+      - name: 'eresseel-pipeline-library'
+        git_url: "ssh://git@bitbucket.eresseel.org:7999/devops/eresseel-pipeline-library.git"
+        credentials: 'sjenkins'
+        default_version: 'master'
+        implicit: "false"
+jenkins_global_shared_library_list:
+  - name: 'eresseel-pipeline-library'
+    git_url: "ssh://git@bitbucket.eresseel.org:7999/devops/eresseel-pipeline-library.git"
+    credentials: 'sjenkins'
+    default_version: 'master'
+jenkins_smtp_host: 'postman.eresseel.org'
+jenkins_admin_address: 'DevOps@eresseel.org'
+jenkins_matrix_authorization_strategy:
+  - user_or_group: 'admin'
+    permissions:
+      - 'hudson.model.Hudson.Administer'
+jenkins_global_properties_environment_variable_list:
+  - name: 'DEVOPS_EMAIL_ADDRESS'
+    value: 'DevOps@mycorp.com'
+jenkins_bitbucket_endpoint:
+  - display_name: "eresseel"
+    server_url: "http://bitbucket.eresseel.org:7990"
+    call_can_merge: true
+    call_changes: true
+    manage_hooks: true
+    credentials_id: "usr_pw_id"
+    webhook_implementation: 'PLUGIN'  # NATIVE
+jenkins_backup_configuration:
+  - name: "backup config"
+    path: "/home/jenkins/jenkins_master_backup_new_path"
+    cron: "0 0 * * 5"
+    max_backup_nuber: 4
+    timeout: 120
+    backup_result: true
+    backup_next_build_number: true
+    move_old_backup_to_zip: true
+jenkins_access_control_for_builds:
+  - authenticator_type: 'GlobalQueueItemAuthenticator'
+    strategy: 'SystemAuthorizationStrategy'
+  - authenticator_type: 'GlobalQueueItemAuthenticator'
+    strategy: 'AnonymousAuthorizationStrategy'
+  - authenticator_type: 'GlobalQueueItemAuthenticator'
+    strategy: 'TriggeringUsersAuthorizationStrategy'
+  - authenticator_type: 'GlobalQueueItemAuthenticator'
+    strategy: 'SpecificUsersAuthorizationStrategy'
+    user_id: 'alma'
