@@ -1,0 +1,139 @@
+---
+- name: Installing Build Tools
+  hosts: jenkins_slave
+  become: true
+  vars:
+    jenkins_jar_location: /opt/jenkins-cli.jar
+  handlers:
+    - name: Restart Docker Daemon
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+  roles:
+    - role: geerlingguy.docker
+      docker_package: "{{ docker_version }}"
+
+    - role: tecris.maven
+      maven_version: "3.9.4"
+  tasks:
+    - name: Install packages from repository
+      ansible.builtin.apt:
+        name:
+          - git
+          - graphviz
+          - openjdk-11-jre
+          - openjdk-11-jdk
+        state: present
+
+    - name: Ensure Docker CA Directory is present
+      ansible.builtin.file:
+        dest: "/etc/docker/certs.d/{{ item.domain }}"
+        state: directory
+      with_items:
+        - "{{ docker_registry_list }}"
+      when: docker_registry_list is defined
+
+    - name: Install The Docker Registry CA for Docker Daemon
+      ansible.builtin.copy:
+        src: "{{ item.crt }}"
+        dest: "/etc/docker/certs.d/{{ item.domain }}/ca.crt"
+      with_items:
+        - "{{ docker_registry_list }}"
+      when: docker_registry_list is defined
+      notify: Restart Docker Daemon
+
+    - name: Configure docker daemon.json
+      ansible.builtin.copy:
+        content: "{{ docker_config | to_nice_json }}"
+        dest: /etc/docker/daemon.json
+        mode: 0444
+        owner: root
+        group: docker
+      when: docker_config is defined
+      notify: Restart Docker Daemon
+
+    - name: Ensure jenkins user is in docker group
+      ansible.builtin.user:
+        name: jenkins
+        append: yes
+        groups: docker
+
+- name: Setup NTP service
+  hosts: jenkins_slave
+  become: true
+  roles:
+    - role: geerlingguy.ntp
+      ntp_area: "{{ node_ntp_area }}"
+      ntp_manage_config: "{{ node_ntp_manage_config }}"
+      ntp_timezone: "{{ node_ntp_timezone }}"
+
+- name: Install node-exporter
+  hosts: jenkins_slave
+  become: true
+  roles:
+    - role: UnderGreen.prometheus-node-exporter
+      vars:
+        prometheus_node_exporter_version: "{{ node_exporter_version }}"
+
+- name: Create cron jobs
+  hosts: jenkins_slave
+  become: true
+  tasks:
+    - name: Schedule clean .m2 repository
+      ansible.builtin.cron:
+        name: "Local maven repo"
+        special_time: daily
+        user: "jenkins"
+        job: >
+          rm -rf /home/jenkins/.m2/repository/ 3>&1 1>&2 2>&3 3>&- |
+          logger -t "cleanup.m2" -p user.err -i
+
+    - name: Schedule docker volume prune
+      ansible.builtin.cron:
+        name: "Prune docker system"
+        special_time: daily
+        user: "jenkins"
+        job: >
+          docker system prune -f 3>&1 1>&2 2>&3 3>&- |
+          logger -t "cleanup.docker" -p user.err -i
+
+    - name: Set max_map_count in runtime
+      ansible.builtin.command:
+        cmd: 'sysctl -w vm.max_map_count=262144'
+      become: true
+      become_user: root
+      changed_when: false
+
+    - name: max_map_count setting at booting time exist
+      ansible.builtin.command:
+        cmd: 'grep "vm.max_map_count=262144" /etc/sysctl.conf'
+      become: true
+      become_user: root
+      register: max_map_count
+      failed_when: max_map_count.rc > 1
+      changed_when: max_map_count.rc == 1
+
+    - name: Set max_map_count at booting time
+      ansible.builtin.shell: echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+      become: true
+      become_user: root
+      when: max_map_count.rc == 1
+
+- name: Include task list in play
+  ansible.builtin.import_playbook: ./tools/playbooks/fake_dns.yml
+
+- name: Configure Jenkins Slaves
+  hosts: jenkins_slave
+  collections:
+    - devops.devops_jenkins_collection
+  roles:
+    - role: ansible_role_jenkins_slave
+      vars:
+        jenkins_slave_hostname: "{{ jenkins_server_name | default(omit) }}"
+        jenkins_slave_http_port: 8080
+        jenkins_slave_admin_username: "{{ secret_jenkins_ad_username | default('admin') }}"
+        jenkins_slave_admin_password: "{{ secret_jenkins_ad_password | default('admin') }}"
+        jenkins_slave_description: "{{ description | default('Dumb Slave') }}"
+        jenkins_slave_executors: "{{ executors | default(1) }}"
+        jenkins_slave_usage: "{{ usage | default('NORMAL') }}"
+        jenkins_slave_labels: "{{ labels | default('devops') }}"
