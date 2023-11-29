@@ -1,5 +1,5 @@
 ---
 collections:
-  - name: https://github.com/eresseel/devops_jenkins_collection.git
+  - name: https://github.com/eresseel/devops_ci_cd_collection.git
     type: git
-    version: main
+    version: feature/OS-19

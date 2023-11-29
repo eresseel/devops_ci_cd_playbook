@@ -1,0 +1,36 @@
+---
+- name: Installing Sonatype Nexus OSS
+  hosts: nexus
+  become: true
+  collections:
+    - devops.devops_ci_cd_collection
+  pre_tasks:
+    - name: Install needed packages from APT repository
+      ansible.builtin.apt:
+        update_cache: yes
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - openjdk-8-jre
+        - openjdk-8-jdk
+  roles:
+    - role: ansible_role_nexus
+      nexus_repos_maven_hosted: "{{ nexus_maven_hosted_repository_list | default([]) }}"
+      nexus_repos_maven_proxy: "{{ nexus_maven_proxy_repository_list | default([]) }}"
+      nexus_repos_maven_group: "{{ nexus_maven_group_repository_list | default([]) }}"
+      nexus_repos_docker_hosted: "{{ nexus_docker_hosted_registry_list | default([]) }}"
+      nexus_repos_raw_hosted: "{{ nexus_raw_hosted_repository_list | default([]) }}"
+      nexus_ldap_connections: "{{ _nexus_ldap_connections | default([]) }}"
+      nexus_roles: "{{ nexus_role_list | default([]) }}"
+      nexus_admin_pw: "{{ _nexus_admin_pw | default('admin123') }}"
+      nexus_user_role_mappings: "{{ _nexus_user_role_mappings | default([]) }}"
+      nexus_scheduled_tasks: "{{ nexus_scheduled_task_list | default([]) }}"
+      nexus_maven_snapshots_cleanup_tasks: "{{ nexus_maven_snapshots_cleanup_task_list | default([]) }}"
+      nexus_repos_cleanup_policies: "{{ nexus_repos_cleanup_policies_list | default([]) }}"
+      nexus_repos_helm_hosted: "{{ nexus_helm_hosted_repository_list | default([]) }}"
+      nexus_repos_conan_hosted: "{{ nexus_conan_hosted_repository_list | default([]) }}"
+      nexus_repos_pypi_hosted: "{{ nexus_pypi_hosted_repository_list | default([]) }}"
+      nexus_repos_pypi_proxy: "{{ nexus_pypi_proxy_repository_list | default([]) }}"
+      nexus_repos_npm_hosted: "{{ nexus_npm_hosted_repository_list | default([]) }}"
+      nexus_repos_npm_proxy: "{{ nexus_npm_proxy_repository_list | default([]) }}"
+      nexus_repos_npm_group: "{{ nexus_npm_group_repository_list | default([]) }}"

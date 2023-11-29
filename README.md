@@ -14,12 +14,14 @@ ansible-vault decrypt ./files/vagrant/id_rsa
 ```bash
 vagrant up jenkins-master
 vagrant up jenkins-slave
+vagrant up nexus
 ```
 
 ## 3. Development provision
 ```bash
 ansible-playbook -i ./inventories/development/hosts jenkins_master.yml
 ansible-playbook -i ./inventories/development/hosts jenkins_slave.yml
+ansible-playbook -i ./inventories/development/hosts nexus.yml
 ```
 
 ## 4. Production provision
@@ -27,9 +29,12 @@ ansible-playbook -i ./inventories/development/hosts jenkins_slave.yml
 ansible-vault decrypt ./inventories/production/group_vars/all/vault.yml  #passwd: alma123
 ansible-playbook -i ./inventories/production/hosts jenkins_master.yml
 ansible-playbook -i ./inventories/production/hosts jenkins_slave.yml
+ansible-playbook -i ./inventories/production/hosts nexus.yml
 ```
 
 ## 5. Vagrant VM destroy
 ```bash
-vagrant destroy -f grafana
+vagrant destroy -f jenkins-master
+vagrant destroy -f jenkins-slave
+vagrant destroy -f nexus
 ```

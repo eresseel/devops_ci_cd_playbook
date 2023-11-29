@@ -1,0 +1,15 @@
+---
+_nexus_admin_pw: admin123
+nexus_docker_hosted_registry_list:
+  - name: 'docker-registry'
+    blob_store: 'default'
+    http_port: 8083
+    v1_enabled: False
+    write_policy: allow
+    cleanup_policies:
+      - remove-docker-older-than-90-days
+nexus_repos_cleanup_policies_list:
+  - name: remove-docker-older-than-90-days
+    format: docker
+    criteria:
+      lastBlobUpdated: 90

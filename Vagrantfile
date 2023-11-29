@@ -64,6 +64,19 @@ Vagrant.configure("2") do |config|
             :ssh => [
                 { :vm_username => "vagrant", :ssh_key_path => "vagrant-files", :ssh_key_name => "id_rsa", :key_type => "rsa", :bit => 4096 }
             ]
+        }, {
+            :box => [
+                { :box_name => "generic/ubuntu2204"}
+            ],
+            :vm_name => "nexus",
+            :hostname => "nexus.erressel.org",
+            :resource_limit => [ {:cpu => 4, :memory => 4096} ],
+            :network => [
+                { :network_type => "private_network", :ip => "192.168.56.12" }
+            ],
+            :ssh => [
+                { :vm_username => "vagrant", :ssh_key_path => "vagrant-files", :ssh_key_name => "id_rsa", :key_type => "rsa", :bit => 4096 }
+            ]
         }
     ]
 

@@ -125,7 +125,7 @@
 - name: Configure Jenkins Slaves
   hosts: jenkins_slave
   collections:
-    - devops.devops_jenkins_collection
+    - devops.devops_ci_cd_collection
   roles:
     - role: ansible_role_jenkins_slave
       vars:

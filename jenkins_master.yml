@@ -79,7 +79,7 @@
   hosts: master
   become: true
   collections:
-    - devops.devops_jenkins_collection
+    - devops.devops_ci_cd_collection
   vars:
     jenkins_jar_location: /opt/jenkins-cli.jar
   roles:
